@@ -5,7 +5,7 @@ on:
 
 jobs:
   release:
-    uses: ./pnpm-ni.yml
+    uses: ./pnpm-ni.yml@main
     with:
       scirpt: npx lvr release
     secrets: inherit
