@@ -2,6 +2,14 @@ name: Setup base env
 
 on:
   workflow_call:
+    inputs:
+      run_script:
+        required: false
+        type: string
+      install:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   setup:
@@ -24,3 +32,11 @@ jobs:
 
       - name: Install @antfu/ni
         run: pnpm i -g @antfu/ni
+
+      - if: ${{ inputs.install == true }}
+        name: Install dependencies
+        run: ni
+
+      - if: ${{ inputs.run_script != null }}
+        name: Run script from inputs
+        run: ${{ inputs.run_script }}

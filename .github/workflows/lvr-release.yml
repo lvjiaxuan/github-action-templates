@@ -1,0 +1,11 @@
+name: lvr release
+
+on:
+  workflow_call:
+
+jobs:
+  release:
+    uses: ./pnpm-ni.yml
+    with:
+      scirpt: npx lvr release
+    secrets: inherit
