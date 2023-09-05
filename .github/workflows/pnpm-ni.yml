@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN && 1 || 2 }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org
