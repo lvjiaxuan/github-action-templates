@@ -40,3 +40,5 @@ jobs:
       - if: ${{ inputs.run_script != null }}
         name: Run script from inputs
         run: ${{ inputs.run_script }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

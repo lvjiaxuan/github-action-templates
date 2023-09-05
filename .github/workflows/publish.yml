@@ -1,0 +1,12 @@
+name: Publish
+
+on:
+  workflow_call:
+
+jobs:
+  publish:
+    uses: ./.github/workflows/pnpm-ni.yml
+    with:
+      install: true
+      run_script: pnpm publish --no-git-checks
+    secrets: inherit

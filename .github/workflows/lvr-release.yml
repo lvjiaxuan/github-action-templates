@@ -5,7 +5,10 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
+      id-token: write
     uses: ./.github/workflows/pnpm-ni.yml
     with:
-      scirpt: npx lvr release
+      run_script: npx lvr release
     secrets: inherit
