@@ -2,11 +2,18 @@ name: Publish
 
 on:
   workflow_call:
+    inputs:
+      sync_cnpm:
+          required: false
+          type: boolean
+      recursive:
+          required: false
+          type: boolean
 
 jobs:
   publish:
     uses: ./.github/workflows/pnpm-ni.yml
     with:
       install: true
-      run_script: pnpm publish --no-git-checks
+      run_script: nlx lvr publish${{ inputs.recursive == true && ' -r' || '' }}${{ inputs.sync_cnpm == true && ' --sync-cnpm' || ''}}
     secrets: inherit
