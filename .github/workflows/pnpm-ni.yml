@@ -13,7 +13,7 @@ on:
         type: string
       pnpm_run_install:
         description: Pass through to pnpm's run_install.
-        default: null
+        default: 'true'
         type: string
 
 jobs:
@@ -36,13 +36,13 @@ jobs:
         with:
           version: 8
           run_install: |
-            - if: ${{ inputs.pnpm_run_install }}
-              ${{ inputs.pnpm_run_install }}
-            - if: ${{ inputs.antfu_ni }}
-              args: [--global, @antfu/ni]
+            - args: []
+              if: ${{ inputs.pnpm_run_install }}
+            - args: [--global, @antfu/ni]
+              if: ${{ inputs.antfu_ni }}
 
-      - if: ${{ inputs.run_script != null }}
-        name: Run script from inputs
+      - name: Run script from inputs
+        if: ${{ inputs.run_script != null }}
         run: ${{ inputs.run_script }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
