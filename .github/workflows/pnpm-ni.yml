@@ -3,40 +3,43 @@ name: Setup base env
 on:
   workflow_call:
     inputs:
+      antfu_ni:
+        description: Whether to install @antfu/ni.
+        type: boolean
+        required: false
+        default: true
       run_script:
         required: false
         type: string
-      install:
-        required: false
-        type: boolean
-        default: false
+      pnpm_run_install:
+        description: Pass through to pnpm's run_install.
+        default: null
+        type: string
 
 jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         with:
-          node-version: 18
+          node-version: 18.x
           registry-url: https://registry.npmjs.org
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-
-      - name: Install @antfu/ni
-        run: pnpm i -g @antfu/ni
-
-      - if: ${{ inputs.install == true }}
-        name: Install dependencies
-        run: ni
+          run_install: |
+            - if: ${{ inputs.pnpm_run_install }}
+              ${{ inputs.pnpm_run_install }}
+            - if: ${{ inputs.antfu_ni }}
+              args: [--global, @antfu/ni]
 
       - if: ${{ inputs.run_script != null }}
         name: Run script from inputs
