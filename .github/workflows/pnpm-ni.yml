@@ -38,8 +38,12 @@ jobs:
           run_install: |
             - args: []
               if: ${{ inputs.pnpm_run_install }}
-            - args: [--global, @antfu/ni]
+            - args: [--global, '@antfu/ni']
               if: ${{ inputs.antfu_ni }}
+            - args: [--global, nrm-lvj]
+              if: false
+
+      - run: nrm ls
 
       - name: Run script from inputs
         if: ${{ inputs.run_script != null }}
