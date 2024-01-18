@@ -40,8 +40,8 @@ jobs:
               if: ${{ inputs.pnpm_run_install }}
             - args: [--global, '@antfu/ni']
               if: ${{ inputs.antfu_ni }}
-            - args: [--global, nrm-lvj]
               if: false
+            - args: [--global, nrm-lvj]
 
       - run: nrm ls
 
