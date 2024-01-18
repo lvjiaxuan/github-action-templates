@@ -3,17 +3,8 @@ name: Setup base env
 on:
   workflow_call:
     inputs:
-      antfu_ni:
-        description: Whether to install @antfu/ni.
-        type: boolean
-        required: false
-        default: true
       run_script:
         required: false
-        type: string
-      pnpm_run_install:
-        description: Pass through to pnpm's run_install.
-        default: 'true'
         type: string
 
 jobs:
@@ -37,13 +28,7 @@ jobs:
           version: 8
           run_install: |
             - args: []
-              if: ${{ inputs.pnpm_run_install }}
             - args: [--global, '@antfu/ni']
-              if: ${{ inputs.antfu_ni }}
-              if: false
-            - args: [--global, nrm-lvj]
-
-      - run: nrm ls
 
       - name: Run script from inputs
         if: ${{ inputs.run_script != null }}

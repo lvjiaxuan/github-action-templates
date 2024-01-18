@@ -2,11 +2,6 @@ name: Release
 
 on:
   workflow_call:
-    inputs:
-      pnpm_run_install:
-        description: Pass through to pnpm's run_install.
-        default: 'true'
-        type: string
 
 jobs:
   release:
@@ -15,6 +10,5 @@ jobs:
       id-token: write
     uses: ./.github/workflows/pnpm-ni.yml
     with:
-      pnpm_run_install: ${{ inputs.pnpm_run_install }}
       run_script: nlx lvr release
     secrets: inherit

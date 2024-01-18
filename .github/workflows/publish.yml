@@ -6,15 +6,10 @@ on:
       sync_cnpm:
         required: false
         type: boolean
-      pnpm_run_install:
-        description: Pass through to pnpm's run_install.
-        default: 'true'
-        type: string
 
 jobs:
   publish:
     uses: ./.github/workflows/pnpm-ni.yml
     with:
-      pnpm_run_install: ${{ inputs.pnpm_run_install }}
       run_script: nlx lvr publish${{ inputs.sync_cnpm == true && ' --sync-cnpm' || ''}}
     secrets: inherit
