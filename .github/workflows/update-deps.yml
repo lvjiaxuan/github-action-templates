@@ -1,0 +1,76 @@
+name: Update Dependencies
+
+on:
+  workflow_call:
+    inputs:
+      tools:
+        description: Use either `ncu` or `taze` to update.
+        type: string
+        required: false
+        default: ncu
+      email:
+        description: The `user.email` set to git.
+        type: string
+        required: false
+      commit_msg:
+        type: string
+        required: false
+        default: "chore: update dependencies."
+
+jobs:
+  update_deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Miss email ?
+        if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
+        run: |
+          echo "::error::Miss both email input and ACTOR_EMAIL variable"
+          stopMarker=$(uuidgen)
+          echo "::stop-commands::$stopMarker"
+          echo "_wont print_"
+
+      - name: Detect Updates with ${{ inputs.tools }}
+        id: detect-updates
+        shell: bash
+        run: |
+          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w -r' }}
+          if [[ `git status --porcelain` ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: No updates for now
+        if: ${{ steps.detect-updates.outputs.changed == 'false' }}
+        shell: bash
+        run: |
+          echo "::notice::No Updates for now. Skip this time."
+          exit 0
+
+      - name: Setup git config
+        shell: bash
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
+
+      - name: Install detected agent
+        run: |
+          git stash
+          npm i @antfu/ni -g
+          nci
+          git stash pop
+
+      - name: Update lock, Commit and Push
+        shell: bash
+        run: |
+          ni --lockfile-only --frozen-lockfile=false
+          git add .
+          git commit -m "${{ inputs.commit_msg }}"
+          git push 
+          echo "::notice::Updates have been detected. Then updated the lock file, did git add / commit / Push ."
