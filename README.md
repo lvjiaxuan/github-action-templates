@@ -64,3 +64,7 @@ jobs:
     with:
       email: xxx@xx.xx
 ```
+
+# Other recommended actions
+
+1. [update-repository-description](https://github.com/zhengbangbo/update-repository-description) by @zhengbangbo
