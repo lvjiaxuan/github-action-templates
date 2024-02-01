@@ -29,6 +29,7 @@ jobs:
 
       - name: Miss email ?
         if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
+        shell: bash
         run: |
           echo "::error::Miss both email input and ACTOR_EMAIL variable"
           stopMarker=$(uuidgen)
@@ -60,6 +61,7 @@ jobs:
           git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
 
       - name: Install detected agent
+        shell: bash
         run: |
           git stash
           npm i @antfu/ni -g

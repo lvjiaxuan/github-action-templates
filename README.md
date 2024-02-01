@@ -42,10 +42,10 @@ jobs:
 
 ## Update dependencies
 
-### Ways of defining the email(required)
+### Ways of defining the user's email, which is required
 
 1. A hard code of inputs. Recommend using GitHub's [noreply email](https://github.com/settings/emails).
-2. If no inputs, detect `vars.ACTOR_EMAIL` by default. Actions secrets and variables :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions
+2. If no inputs, detect `vars.ACTOR_EMAIL` by default. Reference to actions secrets and variables :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions
 
 > [!TIP]
 > :point_right: [cron syntax help](https://crontab.guru/examples.html)
