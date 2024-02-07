@@ -55,12 +55,14 @@ jobs:
           exit 0
 
       - name: Setup git config
+        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         shell: bash
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
 
       - name: Install detected agent
+        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         shell: bash
         run: |
           git stash
@@ -69,6 +71,7 @@ jobs:
           git stash pop
 
       - name: Update lock, Commit and Push
+        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         shell: bash
         run: |
           ni --lockfile-only --frozen-lockfile=false
