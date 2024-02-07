@@ -4,10 +4,6 @@
 2. [lvr-publish](.github/workflows/lvr-publish.yml)
 3. [update-deps](.github/workflows/update-deps.yml)
 
-<!-- 1. The release workflow resolves its notes from `CHANGELOG.md`.
-2. The publish workflow supports syncing pkgs to cnpm, including monorepo.
-3. The update dependencies workflow -->
-
 # Usage
 
 ## Release and Publish are usually used together.
