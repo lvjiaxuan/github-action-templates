@@ -16,6 +16,10 @@ on:
         type: string
         required: false
         default: "chore: update dependencies."
+      args:
+        type: string
+        required: false
+        default: ''
 
 jobs:
   update_deps:
@@ -40,7 +44,7 @@ jobs:
         id: detect-updates
         shell: bash
         run: |
-          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w -r' }}
+          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w' }} ${{ inputs.args }}
           if [[ `git status --porcelain` ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
