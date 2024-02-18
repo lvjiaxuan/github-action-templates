@@ -15,11 +15,15 @@ on:
       commit_msg:
         type: string
         required: false
-        default: "chore: update dependencies."
+        default: 'chore: update dependencies.'
       args:
         type: string
         required: false
         default: ''
+      mode:
+        type: string
+        required: false
+        default: 'commit'
 
 jobs:
   update_deps:
@@ -33,7 +37,6 @@ jobs:
 
       - name: Miss email ?
         if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
-        shell: bash
         run: |
           echo "::error::Miss both email input and ACTOR_EMAIL variable"
           stopMarker=$(uuidgen)
@@ -42,7 +45,6 @@ jobs:
 
       - name: Detect Updates with ${{ inputs.tools }}
         id: detect-updates
-        shell: bash
         run: |
           npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w' }} ${{ inputs.args }}
           if [[ `git status --porcelain` ]]; then
@@ -53,21 +55,18 @@ jobs:
 
       - name: No updates for now
         if: ${{ steps.detect-updates.outputs.changed == 'false' }}
-        shell: bash
         run: |
           echo "::notice::No Updates for now. Skip this time."
           exit 0
 
       - name: Setup git config
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
-        shell: bash
         run: |
           git config user.name ${{ github.actor }}
           git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
 
       - name: Install detected agent
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
-        shell: bash
         run: |
           git stash
           npm i @antfu/ni -g
@@ -76,7 +75,6 @@ jobs:
 
       - name: Update lock, Commit and Push
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
-        shell: bash
         run: |
           ni --lockfile-only --frozen-lockfile=false
           git add .
