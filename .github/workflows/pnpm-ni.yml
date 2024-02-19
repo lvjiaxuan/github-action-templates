@@ -23,12 +23,12 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v3
         with:
           version: 8
           run_install: |
-            - args: []
             - args: [--global, '@antfu/ni']
+            - args: []
 
       - name: Run script from inputs
         if: ${{ inputs.run_script != null }}
