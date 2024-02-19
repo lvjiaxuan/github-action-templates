@@ -41,7 +41,7 @@ jobs:
 ### Ways of defining the user's email, which is required
 
 1. A hard code of inputs. Recommend using GitHub's [noreply email](https://github.com/settings/emails).
-2. If no inputs, detect `vars.ACTOR_EMAIL` by default. Reference to actions secrets and variables :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions
+2. If no inputs, auto-detect `vars.ACTOR_EMAIL` by default. Reference to actions secrets and variables :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions .
 
 > [!TIP]
 > :point_right: [cron syntax help](https://crontab.guru/examples.html)
@@ -58,8 +58,10 @@ jobs:
   update-deps:
     uses: lvjiaxuan/github-action-templates/.github/workflows/update-deps.yml@main
     with:
-      email: xxx@xx.xx
+      email: xxx@xx.xx # If no set `vars.ACTOR_EMAIL`.
 ```
+
+[more inputs](https://github.com/lvjiaxuan/github-action-templates/blob/main/.github/workflows/update-deps.yml)
 
 # Other recommended actions
 

@@ -21,9 +21,9 @@ on:
         required: false
         default: ''
       mode:
-        type: string
+        type: string # push | pr
         required: false
-        default: 'commit'
+        default: push
 
 jobs:
   update_deps:
@@ -65,7 +65,7 @@ jobs:
           git config user.name ${{ github.actor }}
           git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
 
-      - name: Install detected agent
+      - name: Install detected agent by @antfu/ni
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
           git stash
@@ -73,11 +73,28 @@ jobs:
           nci
           git stash pop
 
-      - name: Update lock, Commit and Push
+      - name: Update lock file, and ${{ inputs.mode }}
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
           ni --lockfile-only --frozen-lockfile=false
+          currentBranch=$(git rev-parse --abbrev-ref HEAD)
+          updatesBranch=update-deps/$(uuidgen)
+          git checkout -b $updatesBranch
           git add .
           git commit -m "${{ inputs.commit_msg }}"
-          git push 
-          echo "::notice::Updates have been detected. Then updated the lock file, did git add / commit / Push ."
+          if [ "${{ inputs.mode }}" = "commit" ]; then
+            git switch $currentBranch
+            git merge $updatesBranch
+            git push
+          elif [ "${{ inputs.mode }}" = "pr" ]; then
+            git push -u origin $updatesBranch
+            gh pr create --base $currentBranch --head $updatesBranch --fill
+          else
+            echo "::error::Unknown mode: ${{ inputs.mode }}"
+            stopMarker=$(uuidgen)
+            echo "::stop-commands::$stopMarker"
+          fi
+          echo "::notice::Updates have been detected. The lock file was then updated, followed by git add/commit/push"
+        env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
