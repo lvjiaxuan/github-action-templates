@@ -21,9 +21,9 @@ on:
         required: false
         default: ''
       mode:
-        type: string # push | pr
+        type: string # commit | pr
         required: false
-        default: push
+        default: commit
 
 jobs:
   update_deps:
