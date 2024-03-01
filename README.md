@@ -49,6 +49,10 @@ jobs:
 ```yml
 name: Update Dependencies
 
+permissions:
+  pull-requests: write
+  contents: write
+
 on:
   workflow_dispatch: {}
   schedule:
