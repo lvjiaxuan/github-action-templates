@@ -27,8 +27,8 @@ jobs:
         with:
           version: 8
           run_install: |
-            - args: []
             - args: [--global, '@antfu/ni']
+            - args: []
 
       - name: Run script from inputs
         if: ${{ inputs.run_script != null }}
