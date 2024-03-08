@@ -81,7 +81,7 @@ jobs:
           updatesBranch=update-deps/$(uuidgen)
           git checkout -b $updatesBranch
           git add .
-          git commit -m "${{ inputs.commit_msg }}"
+          git commit -m "${{ inputs.commit_msg }}" --no-verify
           if [ "${{ inputs.mode }}" = "commit" ]; then
             git switch $currentBranch
             git merge $updatesBranch
