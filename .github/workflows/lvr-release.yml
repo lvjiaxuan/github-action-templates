@@ -5,9 +5,6 @@ on:
 
 jobs:
   release:
-    permissions:
-      contents: write
-      id-token: write
     uses: ./.github/workflows/pnpm-ni.yml
     with:
       run_script: nlx lvr release
