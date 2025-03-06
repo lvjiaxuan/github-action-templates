@@ -43,7 +43,7 @@ jobs:
           echo "::stop-commands::$stopMarker"
           echo "_wont print_"
 
-      - name: Detect Updates with ${{ inputs.tools }}
+      - name: Detect Updates by ${{ inputs.tools }}
         id: detect-updates
         run: |
           npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w' }} ${{ inputs.args }}
@@ -76,7 +76,7 @@ jobs:
       - name: Update lock file, and ${{ inputs.mode }}
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
-          ni --lockfile-only --frozen-lockfile=false
+          ni --lockfile-only
           currentBranch=$(git rev-parse --abbrev-ref HEAD)
           updatesBranch=update-deps/$(uuidgen)
           git checkout -b $updatesBranch
@@ -94,7 +94,7 @@ jobs:
             stopMarker=$(uuidgen)
             echo "::stop-commands::$stopMarker"
           fi
-          echo "::notice::Updates have been detected. The lock file was then updated, followed by git add/commit/push"
+          echo "::notice::Updates have been detected, the lock file was then updated, followed by git add/commit/push"
         env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
