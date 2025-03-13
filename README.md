@@ -1,7 +1,7 @@
 # Workflow Templates
 
 1. [lvr-release](.github/workflows/lvr-release.yml)
-2. [lvr-publish](.github/workflows/lvr-publish.yml)
+2. [lvr-publish](.github/workflows/lvr-publish.yml)(to npm)
 3. [update-deps](.github/workflows/update-deps.yml)
 
 # Usage
@@ -10,7 +10,8 @@
 
 Based on my own [release tool](github.com/lvjiaxuan/release).
 
-1. The release workflow resolves release's notes from `CHANGELOG.md`.
+features:
+1. The release workflow extracts release's notes from `CHANGELOG.md` which is created by my tool.
 2. The publish workflow supports syncing published pkgages to cnpm.
 
 ```yml
@@ -37,10 +38,10 @@ jobs:
 
 ## Update dependencies
 
-### Ways of defining the user's email, which is a required param.
+### Ways to set the user's email, which is a required param.
 
 1. A hard code on inputs. Recommend using GitHub's [noreply email](https://github.com/settings/emails).
-2. If no `inputs.email` is provided, auto-detect `vars.ACTOR_EMAIL` by default. Reference to actions secrets and variables :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions .
+2. If `inputs.email` isn't provided, the `vars.ACTOR_EMAIL` will be read. Refer to actions secrets and variables settings :point_right: https://github.com/{actor}/{repo}/settings/secrets/actions .
 
 > [!TIP]
 > :point_right: [cron syntax help](https://crontab.guru/examples.html)
@@ -61,7 +62,7 @@ jobs:
   update-deps:
     uses: lvjiaxuan/github-action-templates/.github/workflows/update-deps.yml@main
     with:
-      email: xxx@xx.xx # Explicitly set `inputs.email`, if `vars.ACTOR_EMAIL` isn't set.
+      email: xxx@xx.xx # Explicitly set `inputs.email`, if `vars.ACTOR_EMAIL` isn't set on repo.
 ```
 
 [more inputs](https://github.com/lvjiaxuan/github-action-templates/blob/main/.github/workflows/update-deps.yml)

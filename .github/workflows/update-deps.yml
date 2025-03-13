@@ -28,6 +28,8 @@ on:
 jobs:
   update_deps:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +75,7 @@ jobs:
           nci
           git stash pop
 
-      - name: Update lock file, and ${{ inputs.mode }}
+      - name: Update only lock file, and ${{ inputs.mode }}
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
           ni --lockfile-only
@@ -95,6 +97,4 @@ jobs:
             echo "::stop-commands::$stopMarker"
           fi
           echo "::notice::Updates have been detected, the lock file was then updated, followed by git add/commit/push"
-        env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
