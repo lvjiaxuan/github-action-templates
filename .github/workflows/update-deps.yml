@@ -48,7 +48,7 @@ jobs:
       - name: Detect Updates by ${{ inputs.tools }}
         id: detect-updates
         run: |
-          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w' }} ${{ inputs.args }}
+          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w --install=false' }} ${{ inputs.args }}
           if [[ `git status --porcelain` ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
