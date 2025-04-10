@@ -31,7 +31,7 @@ jobs:
           run_install: |
             - recursive: true
               args: []
-            - args: [--global, @antfu/ni]
+            - args: [--global, '@antfu/ni']
 
       - name: Run script from inputs
         if: ${{ inputs.run_script != null }}
