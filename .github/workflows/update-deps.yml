@@ -26,16 +26,11 @@ on:
         default: commit
 
 jobs:
-  update_deps:
+  main:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+      - name: Setup base env
+        uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
 
       - name: Miss email ?
         if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
@@ -48,7 +43,7 @@ jobs:
       - name: Detect Updates by ${{ inputs.tools }}
         id: detect-updates
         run: |
-          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w --install=false' }} ${{ inputs.args }}
+          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze major -w -r --install=false' }} ${{ inputs.args }}
           if [[ `git status --porcelain` ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
@@ -58,7 +53,7 @@ jobs:
       - name: No updates for now
         if: ${{ steps.detect-updates.outputs.changed == 'false' }}
         run: |
-          echo "::notice::No Updates for now. Skip this time."
+          # echo "No Updates for now. Skip this time." >> $GITHUB_STEP_SUMMARY
           exit 0
 
       - name: Setup git config
@@ -71,7 +66,6 @@ jobs:
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
           git stash
-          npm i @antfu/ni -g
           nci
           git stash pop
 
@@ -96,5 +90,8 @@ jobs:
             stopMarker=$(uuidgen)
             echo "::stop-commands::$stopMarker"
           fi
-          echo "::notice::Updates have been detected, the lock file was then updated, followed by git add/commit/push"
 
+      - name: Echo to GITHUB_STEP_SUMMARY
+        run: |
+          echo "# Final result :eyes:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.detect-updates.outputs.changed == 'false' && 'No Updates for now. Skip this time.' || 'Updates have been detected, the lock file was then updated, followed by git add/commit/push.' }}" >> $GITHUB_STEP_SUMMARY
