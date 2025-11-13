@@ -26,10 +26,8 @@ on:
         default: commit
 
 jobs:
-  update_deps:
+  main:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Setup base env
         uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
