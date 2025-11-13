@@ -31,7 +31,8 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
+      - name: Setup base env
+        uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
 
       - name: Miss email ?
         if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
@@ -54,7 +55,7 @@ jobs:
       - name: No updates for now
         if: ${{ steps.detect-updates.outputs.changed == 'false' }}
         run: |
-          echo "::notice::No Updates for now. Skip this time."
+          # echo "No Updates for now. Skip this time." >> $GITHUB_STEP_SUMMARY
           exit 0
 
       - name: Setup git config
@@ -67,7 +68,6 @@ jobs:
         if: ${{ steps.detect-updates.outputs.changed == 'true' }}
         run: |
           git stash
-          npm i @antfu/ni -g
           nci
           git stash pop
 
@@ -92,5 +92,8 @@ jobs:
             stopMarker=$(uuidgen)
             echo "::stop-commands::$stopMarker"
           fi
-          echo "::notice::Updates have been detected, the lock file was then updated, followed by git add/commit/push"
 
+      - name: Echo to GITHUB_STEP_SUMMARY
+        run: |
+          echo "# Final result :eyes:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.detect-updates.outputs.changed == 'false' && 'No Updates for now. Skip this time.' || 'Updates have been detected, the lock file was then updated, followed by git add/commit/push.' }}" >> $GITHUB_STEP_SUMMARY
