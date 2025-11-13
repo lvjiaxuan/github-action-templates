@@ -31,11 +31,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
+      - uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
 
       - name: Miss email ?
         if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
@@ -48,7 +44,7 @@ jobs:
       - name: Detect Updates by ${{ inputs.tools }}
         id: detect-updates
         run: |
-          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze -w --install=false' }} ${{ inputs.args }}
+          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze major -w -r --install=false' }} ${{ inputs.args }}
           if [[ `git status --porcelain` ]]; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else

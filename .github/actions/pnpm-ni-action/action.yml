@@ -1,0 +1,34 @@
+name: Setup base env action
+
+inputs:
+  run_script:
+    required: false
+    type: string
+  NODE_AUTH_TOKEN:
+    required: false
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v5
+
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
+      with:
+        node-version: lts/*
+        registry-url: https://registry.npmjs.org
+
+    - name: Enable pnpm by corepack
+      shell: bash
+      run: |
+        corepack enable && corepack prepare pnpm@latest --activate
+        pnpm -v
+
+    - name: Run script from inputs
+      if: ${{ inputs.run_script != null }}
+      shell: bash
+      run: ${{ inputs.run_script }}
