@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      publish:
+        required: false
+        type: boolean
+        default: false
+      sync_cnpm:
+        required: false
+        type: boolean
+        default: false
+
+
+jobs:
+  release:
+    name: Release job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup base env
+        uses: ./../composite-actions/setup
+
+      - name: Publish to NPM
+        id: publish
+        run: nlx lvr publish${{ inputs.sync_cnpm && ' --sync-cnpm' || ''}}
+
+      - name: Release to github
+        id: release
+        if: ${{ steps.publish.outputs.success }}
+        run: nlx lvr release
+
+      - name: Add summary
+        run: |
+          echo "# Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [NPM](${{ steps.publish.outputs.url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release](${{ steps.release.outputs.url }})" >> $GITHUB_STEP_SUMMARY

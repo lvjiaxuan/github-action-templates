@@ -1,0 +1,26 @@
+name: Setup base env action
+
+description: Setup base env
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v7
+
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
+      with:
+        node-version: lts/*
+        registry-url: https://registry.npmjs.org
+
+    - name: Install @antfu/ni globally
+      shell: bash
+      run: |
+        npm i -g @antfu/ni
+      env:
+        NI_DEFAULT_AGENT: pnpm
+        NI_CATALOG: false
+        NI_AUTO_INSTALL: true
