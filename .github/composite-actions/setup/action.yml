@@ -20,7 +20,6 @@ runs:
       shell: bash
       run: |
         npm i -g @antfu/ni
-      env:
-        NI_DEFAULT_AGENT: pnpm
-        NI_CATALOG: false
-        NI_AUTO_INSTALL: true
+        echo "NI_DEFAULT_AGENT=pnpm" >> $GITHUB_ENV
+        echo "NI_CATALOG=true" >> $GITHUB_ENV
+        echo "NI_AUTO_INSTALL=true" >> $GITHUB_ENV

@@ -3,76 +3,55 @@ name: Update Dependencies
 on:
   workflow_call:
     inputs:
-      tools:
-        description: Use either `ncu` or `taze` to update.
-        type: string
-        required: false
-        default: ncu
       email:
-        description: The `user.email` set to git.
+        description: The `user.email` config.
         type: string
         required: false
+        default: ${{github.actor_id}}+${{github.actor}}@users.noreply.github.com
       commit_msg:
         type: string
         required: false
-        default: 'chore: update dependencies.'
-      args:
-        type: string
-        required: false
-        default: ''
+        default: 'chore: update deps on CI'
       mode:
-        type: string # commit | pr
+        description: How to apply updates. `commit` to push directly, `pr` to create a pull request.
+        type: string
         required: false
         default: commit
 
 jobs:
   main:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Setup base env
-        uses: lvjiaxuan/github-action-templates/.github/actions/pnpm-ni-action@main
+      - name: Initialize environment
+        uses: lvjiaxuan/github-action-templates/.github/composite-actions/setup@main
 
-      - name: Miss email ?
-        if: ${{ !inputs.email && !vars.ACTOR_EMAIL }}
+      - name: Detect outdated dependencies
+        id: update_script
         run: |
-          echo "::error::Miss both email input and ACTOR_EMAIL variable"
-          stopMarker=$(uuidgen)
-          echo "::stop-commands::$stopMarker"
-          echo "_wont print_"
-
-      - name: Detect Updates by ${{ inputs.tools }}
-        id: detect-updates
-        run: |
-          npx ${{ inputs.tools == 'ncu' && 'npm-check-updates -u' || 'taze major -w -r --install=false' }} ${{ inputs.args }}
+          set +e
+          npx taze -r -w -i
           if [[ `git status --porcelain` ]]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "hasChanges=true" >> $GITHUB_OUTPUT
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "hasChanges=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: No updates for now
-        if: ${{ steps.detect-updates.outputs.changed == 'false' }}
-        run: |
-          # echo "No Updates for now. Skip this time." >> $GITHUB_STEP_SUMMARY
-          exit 0
-
       - name: Setup git config
-        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
+        if: ${{ steps.update_script.outputs.hasChanges == 'true' }}
         run: |
-          git config user.name ${{ github.actor }}
-          git config user.email ${{ inputs.email || vars.ACTOR_EMAIL }}
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ inputs.email || vars.ACTOR_EMAIL }}"
 
-      - name: Install detected agent by @antfu/ni
-        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
+      - name: Apply updates (${{ inputs.mode }})
+        if: ${{ steps.update_script.outputs.hasChanges == 'true' }}
+        id: update_commit
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git stash
-          nci
-          git stash pop
-
-      - name: Update only lock file, and ${{ inputs.mode }}
-        if: ${{ steps.detect-updates.outputs.changed == 'true' }}
-        run: |
-          ni --lockfile-only
+          ni --package-lock-only
           currentBranch=$(git rev-parse --abbrev-ref HEAD)
           updatesBranch=update-deps/$(uuidgen)
           git checkout -b $updatesBranch
@@ -82,16 +61,34 @@ jobs:
             git switch $currentBranch
             git merge $updatesBranch
             git push
+            # Capture the commit hash for later use
+            commitHash=$(git rev-parse HEAD)
+            echo "commit_hash=$commitHash" >> $GITHUB_OUTPUT
           elif [ "${{ inputs.mode }}" = "pr" ]; then
             git push -u origin $updatesBranch
-            gh pr create --base $currentBranch --head $updatesBranch --fill
+            # gh pr create prints the PR URL on success
+            prUrl=$(gh pr create --base $currentBranch --head $updatesBranch --fill)
+            echo "pr_url=$prUrl" >> $GITHUB_OUTPUT
           else
             echo "::error::Unknown mode: ${{ inputs.mode }}"
             stopMarker=$(uuidgen)
             echo "::stop-commands::$stopMarker"
+            exit 1
           fi
 
-      - name: Echo to GITHUB_STEP_SUMMARY
+      - name: Write job summary
         run: |
-          echo "# Final result :eyes:" >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.detect-updates.outputs.changed == 'false' && 'No Updates for now. Skip this time.' || 'Updates have been detected, the lock file was then updated, followed by git add/commit/push.' }}" >> $GITHUB_STEP_SUMMARY
+          echo "# Summary :eyes:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.update_script.outputs.hasChanges }}" = "false" ]; then
+            echo "All dependencies are up to date" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Dependency updates applied" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ inputs.mode }}" = "commit" ]; then
+              echo "## Commit Link" >> $GITHUB_STEP_SUMMARY
+              echo "[${{ steps.update_commit.outputs.commit_hash }}](https://github.com/${{ github.repository }}/commit/${{ steps.update_commit.outputs.commit_hash }})" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ inputs.mode }}" = "pr" ]; then
+              echo "## Pull Request Link" >> $GITHUB_STEP_SUMMARY
+              echo "[${{ steps.update_commit.outputs.pr_url }}](${{ steps.update_commit.outputs.pr_url }})" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
